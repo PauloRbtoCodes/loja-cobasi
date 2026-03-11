@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loja Cobasi</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; font-family: Arial; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- Phaser 3 -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+
+  <!-- Cenas do jogo (ordem importa!) -->
+  <script src="cenaloja.js"></script>
+  <script src="cutSceneLoja.js"></script>
+  <script src="CenaQuiz.js"></script>
+  <script src="CenaPosQuiz.js"></script>
+
+  <script>
+    const config = {
+      type: Phaser.AUTO,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      backgroundColor: '#000000',
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 },
+          debug: false
+        }
+      },
+      scene: [Cenaloja, cutSceneLoja, CenaQuiz, CenaPosQuiz],
+      scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+      }
+    };
+
+    const game = new Phaser.Game(config);
+
+    window.addEventListener('resize', () => {
+      game.scale.resize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+
+</body>
+</html>
