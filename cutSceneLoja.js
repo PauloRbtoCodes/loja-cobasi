@@ -4,7 +4,7 @@ class cutSceneLoja extends Phaser.Scene {
 
     this._linhas = [
       {
-        personagem: "Vendedora",
+        personagem: "Felipe Rosa",
         texto: "Olá! Bem-vindo à nossa loja. Posso te ajudar?",
         avatar: "npcLoja",
       },
@@ -14,7 +14,7 @@ class cutSceneLoja extends Phaser.Scene {
         avatar: "persona4",
       },
       {
-        personagem: "Vendedora",
+        personagem: "Felipe Rosa",
         texto: "Que ótimo! Mas antes de te ajudar, que tal um desafio?",
         avatar: "npcLoja",
       },
@@ -24,7 +24,7 @@ class cutSceneLoja extends Phaser.Scene {
         avatar: "persona4",
       },
       {
-        personagem: "Vendedora",
+        personagem: "Felipe Rosa",
         texto: "Vou te fazer 5 perguntas sobre nossos produtos. Topas?",
         avatar: "npcLoja",
       },
@@ -147,7 +147,7 @@ class cutSceneLoja extends Phaser.Scene {
     this._textoNome.setStyle({
       fontSize: "18px",
       fontStyle: "bold",
-      fontFamily: "Arial",
+      fontFamily: "arial",
       fill: linha.personagem === "Jogador" ? "#7ec8e3" : "#ffd700",
     });
 
@@ -182,11 +182,7 @@ class cutSceneLoja extends Phaser.Scene {
 
   _encerrar() {
     this.time.delayedCall(100, () => {
-      // Para a cutscene (overlay)
       this.scene.stop("cutSceneLoja");
-      // Para a cena da loja
-      this.scene.stop("Cenaloja");
-      // Inicia o quiz
       this.scene.start("CenaQuiz");
     });
   }

@@ -6,8 +6,13 @@
   <title>Loja Cobasi</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; overflow: hidden; font-family: Arial; }
+    body { background: #000; overflow: hidden; font-family: pixelfy; }
     canvas { display: block; }
+
+    @font-face {
+      font-family: "pixelfy";
+      src: url("assets/pixelfy.ttf") format("truetype");
+    }
   </style>
 </head>
 <body>
@@ -22,29 +27,32 @@
   <script src="CenaPosQuiz.js"></script>
 
   <script>
-    const config = {
-      type: Phaser.AUTO,
-      width: window.innerWidth,
-      height: window.innerHeight,
-      backgroundColor: '#000000',
-      physics: {
-        default: 'arcade',
-        arcade: {
-          gravity: { y: 0 },
-          debug: false
+    // Garante que a fonte carregou antes de iniciar o Phaser
+    document.fonts.ready.then(() => {
+      const config = {
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: '#000000',
+        physics: {
+          default: 'arcade',
+          arcade: {
+            gravity: { y: 0 },
+            debug: false
+          }
+        },
+        scene: [Cenaloja, cutSceneLoja, CenaQuiz, CenaPosQuiz],
+        scale: {
+          mode: Phaser.Scale.RESIZE,
+          autoCenter: Phaser.Scale.CENTER_BOTH
         }
-      },
-      scene: [Cenaloja, cutSceneLoja, CenaQuiz, CenaPosQuiz],
-      scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-      }
-    };
+      };
 
-    const game = new Phaser.Game(config);
+      const game = new Phaser.Game(config);
 
-    window.addEventListener('resize', () => {
-      game.scale.resize(window.innerWidth, window.innerHeight);
+      window.addEventListener('resize', () => {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+      });
     });
   </script>
 

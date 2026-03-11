@@ -8,22 +8,25 @@ class Cenaloja extends Phaser.Scene {
     this.load.image("movel1", "assets/lojaMovel1.png");
     this.load.image("movel4", "assets/lojaMovel4.png");
     this.load.image("movel5", "assets/lojaMovel5.png");
-    this.load.image("npcLoja", "assets/mulhertras1.png");
-    this.load.spritesheet("persona1", "./assets/anda1.PNG", {
-      frameWidth: 16,
-      frameHeight: 27,
+    this.load.image("npcLoja", "assets/FelipeRosa.png");
+    // each sheet is 256px wide with four 64px frames side‑by‑side; height
+    // varies slightly (≈125px) so use 128 to cover them all without cropping
+    // the character and ensure Phaser splits the frames correctly.
+    this.load.spritesheet("persona1", "./assets/MulherCosta.PNG", {
+      frameWidth: 64,
+      frameHeight: 125,
     });
-    this.load.spritesheet("persona2", "./assets/anda2.PNG", {
-      frameWidth: 16,
-      frameHeight: 27,
+    this.load.spritesheet("persona2", "./assets/mulherDireito.PNG", {
+      frameWidth: 63,
+      frameHeight: 127,
     });
-    this.load.spritesheet("persona3", "./assets/anda3.PNG", {
-      frameWidth: 16,
-      frameHeight: 27,
+    this.load.spritesheet("persona3", "./assets/MulherEsquerda.PNG", {
+      frameWidth: 63,
+      frameHeight: 131,
     });
-    this.load.spritesheet("persona4", "./assets/andareto.PNG", {
-      frameWidth: 16,
-      frameHeight: 27,
+    this.load.spritesheet("persona4", "./assets/MulherFrente.PNG", {
+      frameWidth: 64,
+      frameHeight: 125,
     });
   }
 
@@ -53,36 +56,16 @@ class Cenaloja extends Phaser.Scene {
         ry * window.alturaJogo,
         key,
       );
-      sprite.setOrigin(0.5).setScale(scale).setDepth(0);
-      sprite.setFlipX(flipX);
+      sprite.setOrigin(0.5).setScale(scale).setDepth(0).setFlipX(flipX);
       sprite.rx = rx;
       sprite.ry = ry;
-
-      // adiciona corpo estático para colisões, reduzindo o tamanho dele
-      this.physics.add.existing(sprite, true);
-      // hitbox padrão reduzida (80%)
-      const body = sprite.body;
-      let reduction = 0.8;
-      // para movel5 e movel1 diminuímos bastante a hitbox
-      if (key === "movel5" || key === "movel1") {
-        reduction = 0.3; // apenas 30% do sprite
-      }
-      body.setSize(
-        sprite.displayWidth * reduction,
-        sprite.displayHeight * reduction,
-      );
-      body.setOffset(
-        (sprite.displayWidth - sprite.displayWidth * reduction) / 2,
-        (sprite.displayHeight - sprite.displayHeight * reduction) / 2,
-      );
-
       this.moveisSprites.push(sprite);
     });
 
     window.npcLoja = this.add
       .image(window.larguraJogo * 0.5, window.alturaJogo * 0.25, "npcLoja")
       .setScale(0.5)
-      .setDepth(1);
+      .setDepth(-1);
 
     this.physics.world.setBounds(0, 0, window.larguraJogo, window.alturaJogo);
     this.cameras.main.setBounds(0, 0, window.larguraJogo, window.alturaJogo);
@@ -92,11 +75,9 @@ class Cenaloja extends Phaser.Scene {
     this._criarZona(0.1698, 0.3176, 0.1751, 0.1605); // Zona 1
     this._criarZona(0.2488, 0.4691, 0.0519, 0.2031); // Zona 2
     this._criarZona(0.0012, 0.6644, 0.3597, 0.2604); // Zona 3
-    // Zona 4 representa o teto; reduzimos a altura para que o "hitbox" acima fique menor
-    // originalmente 0.1829 de altura relativa, agora usamos 0.1 para diminuir a região
-    this._criarZona(0.02, 0.0011, 0.9746, 0.1); // Zona 4  — teto (altura reduzida)
-    this._criarZona(0.9811, 0.009, 0.0153, 0.1); // Zona 5  — parede direita
-    this._criarZona(0.0035, 0.9091, 0.9917, 0.1); // Zona 6  — chão inferior
+    this._criarZona(0.02, 0.0011, 0.9746, 0.1); // Zona 4  — teto
+    this._criarZona(0.9811, 0.009, 0.0153, 0.9776); // Zona 5  — parede direita
+    this._criarZona(0.0035, 0.9091, 0.9917, 0.0875); // Zona 6  — chão inferior
     this._criarZona(0.3903, 0.8215, 0.0295, 0.1044); // Zona 7
     this._criarZona(0.6621, 0.826, 0.0413, 0.0786); // Zona 8
     this._criarZona(0.3833, 0.881, 0.2836, 0.1); // Zona 9
@@ -109,14 +90,18 @@ class Cenaloja extends Phaser.Scene {
 
     window.spriteJogador = this.physics.add
       .sprite(window.larguraJogo / 2, window.alturaJogo / 2, "persona4")
-      .setScale(3)
+      .setScale(0.8)
       .setDepth(2);
     window.spriteJogador.setCollideWorldBounds(true);
     window.ultimaAnimacao = "anda4";
     this._dialogoAtivado = false;
     this._movendoParaNPC = false;
 
-    this.physics.add.collider(window.spriteJogador, this.zonasColisao);
+    // save the collider so we can toggle it while auto-moving toward NPC
+    this.zonaCollider = this.physics.add.collider(
+      window.spriteJogador,
+      this.zonasColisao,
+    );
     this.cameras.main.startFollow(window.spriteJogador, true, 0.9, 0.9);
 
     const criarAnim = (key, texture, s, e) => {
@@ -150,27 +135,20 @@ class Cenaloja extends Phaser.Scene {
   }
 
   _criarZona(rx, ry, rw, rh) {
-    // aplicamos um fator de redução geral nas zonas porque elas estavam
-    // muito maiores que os móveis e acabavam bloqueando o jogador em
-    // posições onde não deveria. Com 30% do tamanho original, as áreas de
-    // colisão ficam bem mais justas.
-    const shrinkFactor = 0.3; // ajustável se precisar (0.2 = ainda menor)
-
     const x = rx * window.larguraJogo;
     const y = ry * window.alturaJogo;
-    const w = rw * window.larguraJogo * shrinkFactor;
-    const h = rh * window.alturaJogo * shrinkFactor;
+    const w = rw * window.larguraJogo;
+    const h = rh * window.alturaJogo;
     const zona = this.add.zone(x + w / 2, y + h / 2, w, h);
     this.physics.add.existing(zona, true);
     zona.body.setSize(w, h);
     zona.body.reset(x + w / 2, y + h / 2);
     this.zonasColisao.add(zona);
-    // manteremos as proporções originais para recalcular no resize, mas
-    // lembrar que a largura/altura usados depois serão escalados de novo
     zona.rx = rx;
     zona.ry = ry;
     zona.rw = rw;
     zona.rh = rh;
+    return zona;
   }
 
   _onResize() {
@@ -211,7 +189,11 @@ class Cenaloja extends Phaser.Scene {
 
   update() {
     if (!window.spriteJogador || !this.cursors || !this.keys) return;
-    if (this._dialogoAtivado) return;
+    if (this._dialogoAtivado) {
+      window.spriteJogador.setVelocity(0);
+      window.spriteJogador.anims.stop();
+      return;
+    }
 
     const vel = window.velocidadeJogador || 120;
     const npcX = window.larguraJogo * 0.5;
@@ -225,6 +207,13 @@ class Cenaloja extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.keys.e) && dist < 150) {
       this._movendoParaNPC = true;
+      if (this.zonaCollider) {
+        this.zonaCollider.active = false;
+      }
+      // make sure dialog won't start twice if already running
+      if (this.scene.isActive("cutSceneLoja")) {
+        this._movendoParaNPC = false;
+      }
     }
 
     if (this._movendoParaNPC) {
@@ -238,13 +227,20 @@ class Cenaloja extends Phaser.Scene {
         window.spriteJogador.setVelocityX(Math.cos(angulo) * vel);
         window.spriteJogador.setVelocityY(Math.sin(angulo) * vel);
         window.spriteJogador.anims.play("anda4", true);
+        if (window.spriteJogador.body && window.spriteJogador.body.speed < 1) {
+          dist = 0;
+        }
       } else {
         window.spriteJogador.setVelocity(0);
         window.spriteJogador.anims.stop();
         window.spriteJogador.setFrame(0);
+        if (this.zonaCollider) {
+          this.zonaCollider.active = true;
+        }
         this._movendoParaNPC = false;
         this._dialogoAtivado = true;
-        // Inicia a cutscene como overlay (sem parar a Cenaloja)
+        // launch the dialog scene over the current one so the store remains
+        // visible; Cenaloja keeps running but player input is disabled above
         this.scene.launch("cutSceneLoja");
       }
       return;
@@ -290,17 +286,11 @@ class Cenaloja extends Phaser.Scene {
   }
 
   _mostrarIndicacaoFabrica() {
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-
-    // Fundo semi-transparente para a indicação
     this.add
       .rectangle(80, 60, 160, 80, 0x1a1a2e, 0.95)
       .setStrokeStyle(2, 0xffd700)
       .setDepth(20)
       .setScrollFactor(0);
-
-    // Texto de indicação
     this.add
       .text(80, 30, "📍 Fábrica", {
         fontSize: "16px",
@@ -311,9 +301,8 @@ class Cenaloja extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(21)
       .setScrollFactor(0);
-
     this.add
-      .text(80, 65, "Pressione E\npara entrar", {
+      .text(80, 65, "Pressione E\npara sair", {
         fontSize: "12px",
         fill: "#ffffff",
         fontFamily: "Arial",
