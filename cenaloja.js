@@ -6,8 +6,10 @@ class Cenaloja extends Phaser.Scene {
   preload() {
     this.load.image("loja", "assets/lojaCENARIO.png");
     this.load.image("movel1", "assets/lojaMovel1.png");
+    this.load.image("movel3", "assets/lojaMovel3.png");
     this.load.image("movel4", "assets/lojaMovel4.png");
     this.load.image("movel5", "assets/lojaMovel5.png");
+    this.load.image("movel6", "assets/lojaMovel6.png");
     this.load.image("npcLoja", "assets/FelipeRosa.png");
     // each sheet is 256px wide with four 64px frames side‑by‑side; height
     // varies slightly (≈125px) so use 128 to cover them all without cropping
@@ -47,6 +49,8 @@ class Cenaloja extends Phaser.Scene {
       { key: "movel1", rx: 3 / 4, ry: 1 / 2, flipX: false, scale: 0.225 },
       { key: "movel5", rx: 1 / 4, ry: 1 / 2, flipX: false, scale: 0.3 },
       { key: "movel4", rx: 1 / 2, ry: 0.3, flipX: false, scale: 0.18 },
+      { key: "movel6", rx: 0.1, ry: 0.22, flipX: false, scale: 0.22 },
+      { key: "movel3", rx: 0.9, ry: 0.22, flipX: false, scale: 0.22 },
     ];
 
     this.moveisSprites = [];
@@ -83,10 +87,7 @@ class Cenaloja extends Phaser.Scene {
     this._criarZona(0.3833, 0.881, 0.2836, 0.1); // Zona 9
     this._criarZona(0.7211, 0.8687, 0.0295, 0.1); // Zona 10
     this._criarZona(0.6368, 0.3423, 0.2388, 0.1); // Zona 11
-    this._criarZona(0.625, 0.5701, 0.043, 0.1); // Zona 12
-    this._criarZona(0.6822, 0.6117, 0.0507, 0.1); // Zona 13
-    this._criarZona(0.3143, 0.1852, 0.3744, 0.1); // Zona 14
-    this._criarZona(0.4304, 0.7082, 0.1368, 0.1); // Zona 15
+   
 
     window.spriteJogador = this.physics.add
       .sprite(window.larguraJogo / 2, window.alturaJogo / 2, "persona4")
